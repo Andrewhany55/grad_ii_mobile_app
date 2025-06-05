@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 
 class ESP32Service {
-  static const String esp32Ip = "192.168.1.17"; // Update this with your actual ESP32 IP
+  static const String esp32Ip = "192.168.1.5"; // Update this with your actual ESP32 IP
 
   static Future<void> sendSchedule(String name, String dosage, String time) async {
     final url = Uri.parse('http://$esp32Ip/setSchedule');

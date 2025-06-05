@@ -51,7 +51,6 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (_) => const DashboardScreen()),
       );
     } on FirebaseAuthException catch (e) {
-      print("LOGIN ERROR: ${e.code} - ${e.message}");
       String message;
       switch (e.code) {
         case 'user-not-found':
@@ -73,7 +72,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // ✅ Updated: No Firebase, just navigate to dashboard
   void _continueAsGuest() {
     Navigator.pushReplacement(
       context,
@@ -88,75 +86,129 @@ class _LoginScreenState extends State<LoginScreen> {
     final font = isArabic ? GoogleFonts.tajawal() : GoogleFonts.poppins();
 
     return Scaffold(
-      appBar: AppBar(title: Text('sign_in'.tr())),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-        child: Container(
-          padding: const EdgeInsets.all(28),
-          decoration: BoxDecoration(
-            color: theme.cardColor.withOpacity(0.9),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'welcome_back'.tr(),
-                  style: font.copyWith(fontSize: 28, fontWeight: FontWeight.bold),
+      backgroundColor: const Color(0xFFF5F9FF),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 60),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'welcome_back'.tr(),
+                style: font.copyWith(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: 'email'.tr(),
-                    prefixIcon: const Icon(Icons.email),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'password'.tr(),
-                    prefixIcon: const Icon(Icons.lock),
-                  ),
-                ),
-                const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _login,
-                  child: _isLoading
-                      ? const CircularProgressIndicator()
-                      : Text('login'.tr()),
-                ),
-                const SizedBox(height: 20),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const SignupScreen()),
-                    );
-                  },
-                  child: Text(
-                    'dont_have_account'.tr(),
-                    style: font.copyWith(fontWeight: FontWeight.w600, fontSize: 14),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: _continueAsGuest, // ✅ Direct guest nav
-                  child: Text(
-                    'continue_as_guest'.tr(),
-                    style: font.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      color: theme.colorScheme.secondary,
+              ),
+              const SizedBox(height: 30),
+
+              /// Login Card
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 10,
+                      offset: Offset(0, 6),
                     ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        hintText: 'email'.tr(),
+                        prefixIcon: const Icon(Icons.email),
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        hintText: 'password'.tr(),
+                        prefixIcon: const Icon(Icons.lock),
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _login,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1A73E8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        child: _isLoading
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : Text(
+                          'login'.tr(),
+                          style: font.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              /// Sign Up
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SignupScreen()),
+                  );
+                },
+                child: Text(
+                  'dont_have_account'.tr(),
+                  style: font.copyWith(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    color: Colors.black87,
                   ),
                 ),
-              ],
-            ),
+              ),
+
+              /// Guest
+              TextButton(
+                onPressed: _continueAsGuest,
+                child: Text(
+                  'continue_as_guest'.tr(),
+                  style: font.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: theme.colorScheme.secondary,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -8,6 +8,7 @@ import 'theme_provider.dart';
 import 'welcome_screen.dart';
 import 'dashboard_screen.dart';
 
+
 class PillDispenserApp extends StatelessWidget {
   const PillDispenserApp({Key? key}) : super(key: key);
 
@@ -24,39 +25,53 @@ class PillDispenserApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Pill Dispenser',
       themeMode: themeProvider.currentTheme,
-
       theme: ThemeData(
         brightness: Brightness.light,
-        primarySwatch: Colors.pink,
-        scaffoldBackgroundColor: const Color(0xFFFCE4EC),
-        cardColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.pinkAccent),
+        scaffoldBackgroundColor: const Color(0xFFF4F6FA),
+        primaryColor: const Color(0xFF0D47A1),
+        cardColor: Colors.white.withOpacity(0.95),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          foregroundColor: Colors.pinkAccent,
+          foregroundColor: Colors.black,
         ),
         textTheme: baseTextTheme.apply(
-          bodyColor: Colors.pinkAccent,
-          displayColor: Colors.pinkAccent,
+          bodyColor: Colors.black87,
+          displayColor: Colors.black87,
         ),
         inputDecorationTheme: InputDecorationTheme(
-          labelStyle: const TextStyle(color: Colors.pinkAccent),
+          filled: true,
+          fillColor: Colors.white,
+          labelStyle: const TextStyle(color: Color(0xFF0D47A1)),
           focusedBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.pinkAccent),
-            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFF0D47A1), width: 2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.pink).copyWith(
-          secondary: Colors.purple,
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF0D47A1),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            textStyle: baseTextTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          secondary: const Color(0xFF64B5F6),
         ),
       ),
 
+
       darkTheme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF121212),
-        cardColor: const Color(0xFF1E1E1E),
-        iconTheme: const IconThemeData(color: Colors.white),
+        scaffoldBackgroundColor: const Color(0xFF1C1C1E),
+        cardColor: const Color(0xFF2C2C2E).withOpacity(0.95),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -67,18 +82,34 @@ class PillDispenserApp extends StatelessWidget {
           displayColor: Colors.white,
         ),
         inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFF2C2C2E),
           labelStyle: const TextStyle(color: Colors.white),
           focusedBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.cyanAccent),
-            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Colors.tealAccent, width: 2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.tealAccent,
+            foregroundColor: Colors.black,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            textStyle: baseTextTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         colorScheme: const ColorScheme.dark().copyWith(
-          primary: Colors.cyanAccent,
-          onPrimary: Colors.black,
-          secondary: Colors.tealAccent,
+          primary: Colors.tealAccent,
+          secondary: Colors.cyanAccent,
         ),
       ),
+
 
       locale: context.locale,
       supportedLocales: context.supportedLocales,

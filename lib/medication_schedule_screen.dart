@@ -1,12 +1,15 @@
+// medication_schedule_screen.dart
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import 'package:google_fonts/google_fonts.dart';
-import 'esp32_service.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'medication_repository.dart';
 
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 class MedicationScheduleScreen extends StatefulWidget {
-  const MedicationScheduleScreen({Key? key}) : super(key: key);
+  const MedicationScheduleScreen({super.key});
 
   @override
   State<MedicationScheduleScreen> createState() => _MedicationScheduleScreenState();
@@ -18,133 +21,152 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
   TimeOfDay? _selectedTime;
   File? _selectedImage;
 
-  // Select image from gallery
+  @override
+  void initState() {
+    super.initState();
+    _initializeNotification();
+  }
+
+  void _initializeNotification() async {
+    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initSettings = InitializationSettings(android: androidInit);
+    await flutterLocalNotificationsPlugin.initialize(initSettings);
+  }
+
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _selectedImage = File(pickedFile.path);
-      });
-    }
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked != null) setState(() => _selectedImage = File(picked.path));
   }
 
-  // Pick medication time
   Future<void> _pickTime() async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (picked != null) {
-      setState(() {
-        _selectedTime = picked;
-      });
-    }
+    final picked = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    if (picked != null) setState(() => _selectedTime = picked);
   }
 
-  // Save schedule and send to ESP32
+  Future<void> _showNotification(String title, String body) async {
+    const androidDetails = AndroidNotificationDetails(
+      'med_channel', 'Medications',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    const notificationDetails = NotificationDetails(android: androidDetails);
+    await flutterLocalNotificationsPlugin.show(0, title, body, notificationDetails);
+  }
+
   void _saveSchedule() {
-    if (_pillNameController.text.isEmpty ||
-        _pillAmountController.text.isEmpty ||
-        _selectedTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill in all fields.")),
-      );
+    if (_pillNameController.text.isEmpty || _pillAmountController.text.isEmpty || _selectedTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please fill in all fields.")));
       return;
     }
 
-    final pillName = _pillNameController.text.trim();
-    final pillAmount = _pillAmountController.text.trim();
-    final formattedTime = "${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}";
-
-    // Send the schedule to ESP32
-    ESP32Service.sendSchedule(pillName, pillAmount, formattedTime);
-
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Schedule saved and sent to dispenser!")),
+    final med = Medication(
+      name: _pillNameController.text.trim(),
+      amount: _pillAmountController.text.trim(),
+      time: _selectedTime!,
+      image: _selectedImage,
     );
 
+    MedicationRepository.addMedication(med);
+    _showNotification("New Medication Scheduled", "${med.name} at ${med.time.format(context)}");
+
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Saved & Notification Sent!")));
     _pillNameController.clear();
     _pillAmountController.clear();
     setState(() {
-      _selectedTime = null;
       _selectedImage = null;
+      _selectedTime = null;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final font = GoogleFonts.poppins();
+    final theme = Theme.of(context);
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text("Medication Schedule"),
-        backgroundColor: Colors.pinkAccent,
+        title: const Text("Schedule Medication"),
+        backgroundColor: theme.primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Text(
-                      "Pill Details",
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.pinkAccent,
+            Text("🩺 Add New Medication", style: font.copyWith(fontSize: 24, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: theme.cardColor,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
+              ),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _pillNameController,
+                    decoration: InputDecoration(
+                      labelText: "Pill Name",
+                      prefixIcon: const Icon(Icons.medication_outlined),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _pillAmountController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: "Dosage (mg)",
+                      prefixIcon: const Icon(Icons.scale_outlined),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  GestureDetector(
+                    onTap: _pickTime,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.access_time, size: 20),
+                          const SizedBox(width: 12),
+                          Text(
+                            _selectedTime == null ? "Select Time" : _selectedTime!.format(context),
+                            style: font.copyWith(fontSize: 16),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    _selectedImage != null
-                        ? ClipRRect(
+                  ),
+                  const SizedBox(height: 16),
+                  if (_selectedImage != null)
+                    ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.file(_selectedImage!, height: 100),
+                      child: Image.file(_selectedImage!, height: 100, fit: BoxFit.cover),
                     )
-                        : const Icon(Icons.medication_outlined, size: 80, color: Colors.pinkAccent),
-                    TextButton.icon(
-                      onPressed: _pickImage,
-                      icon: const Icon(Icons.upload),
-                      label: const Text("Upload Pill Image"),
-                    ),
-                    const SizedBox(height: 20),
-                    TextField(
-                      controller: _pillNameController,
-                      decoration: const InputDecoration(
-                        labelText: "Pill Name",
-                        prefixIcon: Icon(Icons.local_hospital),
-                        border: OutlineInputBorder(),
+                  else
+                    Container(
+                      height: 100,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                      child: const Center(child: Icon(Icons.image, size: 40, color: Colors.grey)),
                     ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _pillAmountController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: "Dosage (mg)",
-                        prefixIcon: Icon(Icons.scale),
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ListTile(
-                      title: Text(
-                        _selectedTime == null
-                            ? "Select Time"
-                            : "Time: ${_selectedTime!.format(context)}",
-                      ),
-                      trailing: const Icon(Icons.access_time, color: Colors.pinkAccent),
-                      onTap: _pickTime,
-                      tileColor: Colors.grey[100],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ],
-                ),
+                  TextButton.icon(
+                    onPressed: _pickImage,
+                    icon: const Icon(Icons.upload),
+                    label: const Text("Upload Image"),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 30),
@@ -152,16 +174,14 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: _saveSchedule,
-                icon: const Icon(Icons.save),
-                label: const Text("Save & Schedule"),
+                icon: const Icon(Icons.save_alt),
+                label: const Text("Save & Notify"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.pinkAccent,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  textStyle: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  backgroundColor: theme.primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: font.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
               ),
             ),
