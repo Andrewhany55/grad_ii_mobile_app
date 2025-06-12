@@ -19,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool _isLoading = false;
+  bool _rememberMe = false;
 
   Future<void> _login() async {
     setState(() => _isLoading = true);
@@ -86,24 +87,33 @@ class _LoginScreenState extends State<LoginScreen> {
     final font = isArabic ? GoogleFonts.tajawal() : GoogleFonts.poppins();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F9FF),
+      backgroundColor: const Color(0xFFE8F9FD),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 60),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const SizedBox(height: 16),
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFF3674B5),
+                ),
+                child: const Icon(Icons.medical_services, color: Colors.white, size: 40),
+              ),
+              const SizedBox(height: 20),
               Text(
                 'welcome_back'.tr(),
                 style: font.copyWith(
-                  fontSize: 28,
+                  fontSize: 26,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
               ),
               const SizedBox(height: 30),
-
-              /// Login Card
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
@@ -112,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   boxShadow: const [
                     BoxShadow(
                       color: Colors.black12,
-                      blurRadius: 10,
+                      blurRadius: 12,
                       offset: Offset(0, 6),
                     ),
                   ],
@@ -123,90 +133,88 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
-                        hintText: 'email'.tr(),
-                        prefixIcon: const Icon(Icons.email),
-                        filled: true,
-                        fillColor: Colors.grey[100],
+                        labelText: 'email'.tr(),
+                        prefixIcon: const Icon(Icons.email_outlined),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide.none,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     TextField(
                       controller: _passwordController,
                       obscureText: true,
                       decoration: InputDecoration(
-                        hintText: 'password'.tr(),
-                        prefixIcon: const Icon(Icons.lock),
-                        filled: true,
-                        fillColor: Colors.grey[100],
+                        labelText: 'password'.tr(),
+                        prefixIcon: const Icon(Icons.lock_outline),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide.none,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: _rememberMe,
+                              onChanged: (val) {
+                                setState(() => _rememberMe = val ?? false);
+                              },
+                            ),
+                            Text('remember_me'.tr(), style: font.copyWith(fontSize: 13)),
+                          ],
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text('forgot_password'.tr(), style: font.copyWith(fontSize: 13)),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 20),
                     SizedBox(
                       width: double.infinity,
                       height: 48,
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _login,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1A73E8),
+                          backgroundColor: const Color(0xFF3674B5),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
                         ),
                         child: _isLoading
                             ? const CircularProgressIndicator(color: Colors.white)
-                            : Text(
-                          'login'.tr(),
-                          style: font.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
+                            : Text('login'.tr(), style: font.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    Text('or_signin_with'.tr(), style: font.copyWith(fontSize: 13)),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.account_circle, color: Colors.black87, size: 32),
+                        const SizedBox(width: 16),
+                        Icon(Icons.fingerprint, color: Colors.black54, size: 32),
+                      ],
+                    )
                   ],
                 ),
               ),
-
               const SizedBox(height: 20),
-
-              /// Sign Up
               TextButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const SignupScreen()),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const SignupScreen()));
                 },
-                child: Text(
-                  'dont_have_account'.tr(),
-                  style: font.copyWith(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                    color: Colors.black87,
-                  ),
-                ),
+                child: Text('dont_have_account'.tr(), style: font.copyWith(fontSize: 14)),
               ),
-
-              /// Guest
               TextButton(
                 onPressed: _continueAsGuest,
-                child: Text(
-                  'continue_as_guest'.tr(),
-                  style: font.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: theme.colorScheme.secondary,
-                  ),
-                ),
+                child: Text('continue_as_guest'.tr(),
+                    style: font.copyWith(fontSize: 14, color: theme.colorScheme.secondary, fontWeight: FontWeight.bold)),
               ),
             ],
           ),

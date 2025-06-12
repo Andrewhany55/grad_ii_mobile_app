@@ -61,22 +61,24 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
   @override
   Widget build(BuildContext context) {
     final isArabic = context.locale.languageCode == 'ar';
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final font = GoogleFonts.poppins();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
-          /// Blue background
+          // Background color block
           Positioned(
             top: MediaQuery.of(context).size.height * 0.4,
             left: 0,
             right: 0,
             bottom: 0,
             child: Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFF1A73E8),
-                borderRadius: BorderRadius.only(
+              decoration: BoxDecoration(
+                color: theme.primaryColor,
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(100),
                   topRight: Radius.circular(100),
                 ),
@@ -84,7 +86,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
             ),
           ),
 
-          /// Theme & Language
+          // Theme & Language Switch
           Positioned(
             top: 50,
             left: 0,
@@ -93,12 +95,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.light_mode, color: Colors.black),
-                  onPressed: () => themeProvider.toggleTheme(),
+                  icon: Icon(
+                    isDark ? Icons.dark_mode : Icons.light_mode,
+                    color: theme.iconTheme.color,
+                  ),
+                  onPressed: () => context.read<ThemeProvider>().toggleTheme(),
                 ),
                 const SizedBox(width: 12),
                 IconButton(
-                  icon: const Icon(Icons.language, color: Colors.black),
+                  icon: Icon(Icons.language, color: theme.iconTheme.color),
                   onPressed: () {
                     final newLocale = isArabic ? const Locale('en') : const Locale('ar');
                     context.setLocale(newLocale);
@@ -108,7 +113,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
             ),
           ),
 
-          /// Lottie pill animation
+          // Animation
           Positioned(
             top: MediaQuery.of(context).size.height * 0.14,
             left: MediaQuery.of(context).size.width * 0.2,
@@ -122,7 +127,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
             ),
           ),
 
-          /// App name + tagline with fade-in
+          // App name and tagline
           Positioned(
             top: MediaQuery.of(context).size.height * 0.48,
             left: 0,
@@ -133,7 +138,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                 children: [
                   Text(
                     'app_name'.tr(),
-                    style: GoogleFonts.poppins(
+                    style: font.copyWith(
                       fontSize: _fontSize + 6,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -142,7 +147,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                   const SizedBox(height: 10),
                   Text(
                     'tagline'.tr(),
-                    style: GoogleFonts.poppins(
+                    style: font.copyWith(
                       fontSize: _fontSize - 2,
                       color: Colors.white70,
                     ),
@@ -162,7 +167,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
             ),
           ),
 
-          /// Font size slider
+          // Font size control
           Positioned(
             bottom: 150,
             left: 20,
@@ -171,9 +176,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
               children: [
                 Text(
                   'Font Size',
-                  style: GoogleFonts.poppins(
+                  style: font.copyWith(
                     fontSize: 14,
-                    color: Colors.black,
+                    color: theme.textTheme.bodyLarge?.color,
                   ),
                 ),
                 Slider(
@@ -184,14 +189,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                     setState(() => _fontSize = value);
                     _saveFontSize(value);
                   },
-                  activeColor: Colors.black,
-                  inactiveColor: Colors.black26,
+                  activeColor: theme.primaryColor,
+                  inactiveColor: theme.dividerColor,
                 ),
               ],
             ),
           ),
 
-          /// Animated "Get Started" button
+          // "Get Started" button
           Positioned(
             bottom: 60,
             left: 24,
@@ -203,22 +208,21 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
                   await _scaleController.forward();
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
                 },
-                icon: const Icon(Icons.arrow_forward, color: Colors.black),
+                icon: const Icon(Icons.arrow_forward),
                 label: Text(
                   'get_started'.tr(),
-                  style: GoogleFonts.poppins(
+                  style: font.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
+                  backgroundColor: theme.colorScheme.onPrimary,
+                  foregroundColor: theme.primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(50),
                   ),
-                  shadowColor: Colors.black26,
                   elevation: 5,
                 ),
               ),

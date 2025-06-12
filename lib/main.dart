@@ -6,6 +6,8 @@ import 'theme_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'splash_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,13 +40,39 @@ class MyAppWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => ThemeProvider(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        locale: context.locale,
-        supportedLocales: context.supportedLocales,
-        localizationsDelegates: context.localizationDelegates,
-        home: const SplashScreen(), // نبدأ بالسبيلاش أولاً
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            locale: context.locale,
+            supportedLocales: context.supportedLocales,
+            localizationsDelegates: context.localizationDelegates,
+            themeMode: themeProvider.currentTheme,
+            theme: ThemeData(
+              brightness: Brightness.light,
+              scaffoldBackgroundColor: const Color(0xFFF5F9FF),
+              primaryColor: const Color(0xFF3674B5),
+              textTheme: GoogleFonts.poppinsTextTheme(),
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFF3674B5),
+                brightness: Brightness.light,
+              ),
+            ),
+            darkTheme: ThemeData(
+              brightness: Brightness.dark,
+              scaffoldBackgroundColor: const Color(0xFF121212),
+              primaryColor: const Color(0xFF3674B5),
+              textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFF3674B5),
+                brightness: Brightness.dark,
+              ),
+            ),
+            home: const SplashScreen(),
+          );
+        },
       ),
     );
   }
 }
+

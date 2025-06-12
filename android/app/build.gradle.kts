@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.grad_ii_mobile_app"
+    namespace = "com.example.DoseMe"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 

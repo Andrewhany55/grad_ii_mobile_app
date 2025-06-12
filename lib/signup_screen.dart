@@ -42,7 +42,6 @@ class _SignupScreenState extends State<SignupScreen> {
         MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
     } on FirebaseAuthException catch (e) {
-      print("SIGNUP ERROR: ${e.code} - ${e.message}");
       String message;
       switch (e.code) {
         case 'email-already-in-use':
@@ -72,7 +71,6 @@ class _SignupScreenState extends State<SignupScreen> {
         MaterialPageRoute(builder: (_) => const DashboardScreen()),
       );
     } catch (e) {
-      print("GUEST SIGN-IN ERROR: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("guest_login_failed".tr())),
       );
@@ -86,44 +84,92 @@ class _SignupScreenState extends State<SignupScreen> {
     final font = isArabic ? GoogleFonts.tajawal() : GoogleFonts.poppins();
 
     return Scaffold(
-      appBar: AppBar(title: Text('sign_up_title'.tr())),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-        child: Container(
-          padding: const EdgeInsets.all(28),
-          decoration: BoxDecoration(
-            color: theme.cardColor.withOpacity(0.9),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('create_account'.tr(), style: font.copyWith(fontSize: 28, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 20),
-                TextField(controller: _fullNameController, decoration: InputDecoration(labelText: 'full_name'.tr(), prefixIcon: const Icon(Icons.person))),
-                const SizedBox(height: 20),
-                TextField(controller: _emailController, decoration: InputDecoration(labelText: 'email'.tr(), prefixIcon: const Icon(Icons.email))),
-                const SizedBox(height: 20),
-                TextField(controller: _passwordController, obscureText: true, decoration: InputDecoration(labelText: 'password'.tr(), prefixIcon: const Icon(Icons.lock))),
-                const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _signUp,
-                  child: _isLoading ? const CircularProgressIndicator() : Text('sign_up'.tr()),
+      backgroundColor: const Color(0xFFE8F9FD),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF3674B5),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: Text('sign_up_title'.tr(), style: font.copyWith(fontWeight: FontWeight.bold)),
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, 6)),
+                  ],
                 ),
-                const SizedBox(height: 20),
-                TextButton(
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
-                  child: Text('already_have_account'.tr(), style: font.copyWith(fontWeight: FontWeight.w600, fontSize: 14)),
+                child: Column(
+                  children: [
+                    Text(
+                      'create_account'.tr(),
+                      style: font.copyWith(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.black87),
+                    ),
+                    const SizedBox(height: 24),
+                    TextField(
+                      controller: _fullNameController,
+                      decoration: InputDecoration(
+                        labelText: 'full_name'.tr(),
+                        prefixIcon: const Icon(Icons.person_outline),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        labelText: 'email'.tr(),
+                        prefixIcon: const Icon(Icons.email_outlined),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: 'password'.tr(),
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _signUp,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF3674B5),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
+                        child: _isLoading
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : Text('sign_up'.tr(), style: font.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
+                      child: Text('already_have_account'.tr(), style: font.copyWith(fontSize: 14)),
+                    ),
+                    TextButton(
+                      onPressed: _continueAsGuest,
+                      child: Text(
+                        'continue_as_guest'.tr(),
+                        style: font.copyWith(fontSize: 14, fontWeight: FontWeight.bold, color: theme.colorScheme.secondary),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: _continueAsGuest,
-                  child: Text('continue_as_guest'.tr(), style: font.copyWith(fontWeight: FontWeight.w600, fontSize: 14, color: theme.colorScheme.secondary)),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
